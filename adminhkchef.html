@@ -7,8 +7,8 @@
 
 <style>
 body{font-family:system-ui;background:#f2f2f2;padding:40px}
-.panel{max-width:400px;margin:auto;background:#fff;padding:20px;border-radius:12px;box-shadow:0 10px 30px rgba(0,0,0,.2)}
-input,button{width:100%;padding:10px;margin-top:10px}
+.panel{max-width:420px;margin:auto;background:#fff;padding:20px;border-radius:12px;box-shadow:0 10px 30px rgba(0,0,0,.2)}
+input,textarea,button{width:100%;padding:10px;margin-top:10px}
 button{background:#000;color:#fff;border:0;border-radius:6px}
 </style>
 </head>
@@ -23,24 +23,43 @@ button{background:#000;color:#fff;border:0;border-radius:6px}
 
 <div class="panel" id="admin" style="display:none">
   <h3>Painel Admin</h3>
-  <input id="valor" placeholder="Valor (ex: R$ 475,21)">
+
+  <input id="titulo" placeholder="Título">
+  <input id="subtitulo" placeholder="Subtítulo">
+  <input id="valor" placeholder="Valor (R$ 475,21)">
   <textarea id="codigo" placeholder="Código Pix"></textarea>
-  <button onclick="salvar()">Salvar para clientes</button>
+  <input id="validade" placeholder="Texto de validade">
+
+  <button onclick="salvar()">Salvar (clientes verão ao recarregar)</button>
 </div>
 
 <script>
 function entrar(){
   if(document.getElementById('senha').value === '001533'){
-    document.getElementById('login').style.display = 'none';
-    document.getElementById('admin').style.display = 'block';
+    login.style.display = 'none';
+    admin.style.display = 'block';
+
+    const dados = JSON.parse(localStorage.getItem('pix_data')) || {};
+    titulo.value = dados.titulo || '';
+    subtitulo.value = dados.subtitulo || '';
+    valor.value = dados.valor || '';
+    codigo.value = dados.codigo || '';
+    validade.value = dados.validade || '';
   } else {
     alert('Senha incorreta');
   }
 }
 
 function salvar(){
-  localStorage.setItem('pix_valor', document.getElementById('valor').value);
-  localStorage.setItem('pix_codigo', document.getElementById('codigo').value);
+  const dados = {
+    titulo: titulo.value,
+    subtitulo: subtitulo.value,
+    valor: valor.value,
+    codigo: codigo.value,
+    validade: validade.value
+  };
+
+  localStorage.setItem('pix_data', JSON.stringify(dados));
   alert('Atualizado. Clientes verão ao recarregar.');
 }
 </script>
