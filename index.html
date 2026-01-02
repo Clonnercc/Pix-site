@@ -17,9 +17,11 @@ body{margin:0;font-family:system-ui;background:#f2f2f2}
 .code{background:#f4f4f4;padding:10px;border-radius:6px;font-size:12px;word-break:break-all}
 .btn{margin-top:15px;width:100%;padding:12px;border:0;border-radius:8px;font-size:16px;cursor:pointer}
 .primary{background:#1c9bd6;color:#fff}
-
-/* Modal */
-.modal{position:fixed;inset:0;background:rgba(0,0,0,.45);display:none;place-items:center;z-index:10}
+.instructions{margin-top:18px;font-size:14px;color:#444;line-height:1.5}
+.instructions strong{display:block;margin-bottom:6px}
+.instructions ul{padding-left:18px;margin:8px 0}
+.instructions li{margin-bottom:4px}
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.45);display:none;place-items:center}
 .modal .box{background:#fff;border-radius:12px;padding:20px;max-width:320px;text-align:center}
 </style>
 </head>
@@ -29,25 +31,35 @@ body{margin:0;font-family:system-ui;background:#f2f2f2}
 <div class="screen">
   <div class="top">
     <div class="icon">🛍️</div>
-    <h2 id="titulo">Falta pouco!</h2>
-    <p id="subtitulo">Copie e cole o código no seu app de pagamentos</p>
+    <h2 id="titulo">Carregando...</h2>
+    <p id="subtitulo"></p>
   </div>
 
   <div class="content">
     <div class="card">
-      <div class="label">Valor do Pix a pagar:</div>
-      <div class="value" id="valor">Carregando...</div>
 
-      <div class="label">Código Pix:</div>
+      <div class="label">Valor do Pix:</div>
+      <div class="value" id="valor"></div>
 
-      <!-- código limpo -->
-      <textarea id="pixCode" style="position:absolute;left:-9999px"></textarea>
-      <div class="code" id="pixView">Carregando...</div>
+      <div class="label">Código Pix (Copia e Cola):</div>
+      <div class="code" id="codigo"></div>
 
       <button class="btn primary" onclick="copiar()">Copiar código</button>
-      <p style="font-size:12px;color:#777;margin-top:8px" id="validade">
-        Código válido por 30 minutos.
-      </p>
+      <p id="validade" style="font-size:12px;color:#777;margin-top:8px"></p>
+
+      <!-- INSTRUÇÕES CORRETAS -->
+      <div class="instructions">
+        <strong>Como pagar usando Pix (Copia e Cola)</strong>
+        <ul>
+          <li>Abra o aplicativo do seu banco</li>
+          <li>Escolha a opção <strong>Pix</strong></li>
+          <li>Selecione <strong>Pix Copia e Cola</strong></li>
+          <li>Cole o código copiado</li>
+          <li>Confira o valor e confirme o pagamento</li>
+        </ul>
+        <small>⚠️ O pagamento deve ser feito exatamente pelo valor informado.</small>
+      </div>
+
     </div>
   </div>
 </div>
@@ -55,36 +67,46 @@ body{margin:0;font-family:system-ui;background:#f2f2f2}
 <!-- MODAL -->
 <div class="modal" id="modal">
   <div class="box">
-    <h3>Você copiou o código!</h3>
-    <ol style="text-align:left;font-size:14px">
-      <li>Abra seu app bancário</li>
-      <li>Escolha Pix</li>
-      <li>Cole o código</li>
-    </ol>
-    <button class="btn primary" onclick="modal.style.display='none'">Entendi</button>
+    <h3>Código copiado</h3>
+    <p>Cole no seu app bancário</p>
+    <button class="btn primary" onclick="fechar()">Entendi</button>
   </div>
 </div>
 
 <script>
-function carregar(){
-  const dados = JSON.parse(localStorage.getItem('pix_data')) || {};
+const API = 'https://pix-site-api.onrender.com/api/pix';
+let PIX_CODE = '';
 
-  document.getElementById('titulo').innerText = dados.titulo || 'Falta pouco!';
-  document.getElementById('subtitulo').innerText = dados.subtitulo || 'Copie e cole o código no seu app de pagamentos';
-  document.getElementById('valor').innerText = dados.valor || 'R$ 0,00';
-  document.getElementById('pixView').innerText = dados.codigo || '—';
-  document.getElementById('pixCode').value = dados.codigo || '';
-  document.getElementById('validade').innerText = dados.validade || 'Código válido por 30 minutos.';
+// Carregar dados da API
+fetch(API)
+  .then(res => res.json())
+  .then(data => {
+    document.getElementById('titulo').innerText = data.titulo;
+    document.getElementById('subtitulo').innerText = data.subtitulo;
+    document.getElementById('valor').innerText = data.valor;
+    document.getElementById('codigo').innerText = data.codigo;
+    document.getElementById('validade').innerText = data.validade;
+
+    // guarda o código em memória (evita teclado)
+    PIX_CODE = data.codigo;
+  })
+  .catch(() => {
+    document.getElementById('titulo').innerText = 'Erro ao carregar Pix';
+    document.getElementById('subtitulo').innerText = 'Tente novamente mais tarde';
+  });
+
+// Copiar Pix sem foco / sem teclado
+function copiar() {
+  if (!PIX_CODE) return;
+
+  navigator.clipboard.writeText(PIX_CODE).then(() => {
+    document.getElementById('modal').style.display = 'grid';
+  });
 }
 
-function copiar(){
-  const pix = document.getElementById('pixCode');
-  pix.select();
-  document.execCommand('copy');
-  modal.style.display = 'grid';
+function fechar() {
+  document.getElementById('modal').style.display = 'none';
 }
-
-carregar();
 </script>
 
 </body>
