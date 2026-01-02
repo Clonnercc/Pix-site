@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Pagamento Pix</title>
+
+<style>
+body{margin:0;font-family:system-ui;background:#f2f2f2}
+.screen{min-height:100vh;display:flex;flex-direction:column}
+.top{background:#2db36c;color:#fff;padding:30px 20px;text-align:center}
+.icon{width:80px;height:80px;border-radius:50%;background:#fff;margin:0 auto 15px;display:grid;place-items:center;color:#2db36c;font-size:36px}
+.content{padding:20px}
+.card{background:#fff;border-radius:12px;padding:20px;box-shadow:0 10px 25px rgba(0,0,0,.08)}
+.label{color:#666;font-size:14px;margin-bottom:5px}
+.value{font-size:18px;font-weight:700;margin-bottom:10px}
+.code{background:#f4f4f4;padding:10px;border-radius:6px;font-size:12px;word-break:break-all}
+.btn{margin-top:15px;width:100%;padding:12px;border:0;border-radius:8px;font-size:16px;cursor:pointer}
+.primary{background:#1c9bd6;color:#fff}
+.ghost{background:#eaeaea}
+
+/* Modal */
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.45);display:none;place-items:center;z-index:10}
+.modal .box{background:#fff;border-radius:12px;padding:20px;max-width:320px;text-align:center}
+
+/* Admin */
+.admin{
+  max-width:400px;
+  margin:40px auto;
+  background:#fff;
+  border-radius:12px;
+  padding:20px;
+  box-shadow:0 10px 30px rgba(0,0,0,.2);
+  display:none;
+}
+.admin input{width:100%;margin-bottom:10px;padding:8px}
+</style>
+</head>
+
+<body>
+
+<!-- CLIENTE -->
+<div class="screen" id="clientScreen">
+  <div class="top">
+    <div class="icon">🛍️</div>
+    <h2>Falta pouco!</h2>
+    <p>Copie e cole o código no seu app de pagamentos</p>
+  </div>
+
+  <div class="content">
+    <div class="card">
+      <div class="label">Valor do Pix a pagar:</div>
+      <div class="value" id="valor">R$ 475,21</div>
+
+      <div class="label">Código Pix:</div>
+
+      <!-- Código limpo para cópia -->
+      <textarea id="pixCode" readonly style="position:absolute;left:-9999px">
+00020126580014br.gov.bcb.pix0136codigo-exemplo-teste
+      </textarea>
+
+      <div class="code" id="pixView">
+00020126580014br.gov.bcb.pix0136codigo-exemplo-teste
+      </div>
+
+      <button class="btn primary" id="copyBtn">Copiar código</button>
+      <p style="font-size:12px;color:#777;margin-top:8px">Código válido por 30 minutos.</p>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL -->
+<div class="modal" id="confirmModal">
+  <div class="box">
+    <h3>Você copiou o código!</h3>
+    <ol style="text-align:left;font-size:14px">
+      <li>Abra seu app bancário</li>
+      <li>Escolha Pix</li>
+      <li>Cole o código</li>
+    </ol>
+    <button class="btn primary" onclick="confirmModal.style.display='none'">Entendi</button>
+  </div>
+</div>
+
+<!-- ADMIN -->
+<div class="admin" id="adminPanel">
+  <h3>Painel Admin</h3>
+  <input id="adminValor" placeholder="Valor (ex: R$ 120,00)">
+  <input id="adminCode" placeholder="Código Pix">
+  <button class="btn ghost" id="saveAdmin">Salvar</button>
+</div>
+
+<script>
+/* COPIAR PIX REAL */
+document.getElementById('copyBtn').onclick = () => {
+  const pix = document.getElementById('pixCode');
+  pix.select();
+  document.execCommand('copy');
+  confirmModal.style.display = 'grid';
+};
+
+/* DETECTAR ADMIN POR URL */
+const isAdmin =
+  location.pathname.includes('adminhkchef') ||
+  location.search.includes('adminhkchef');
+
+if(isAdmin){
+  document.getElementById('clientScreen').style.display = 'none';
+
+  const senha = prompt('Senha do Admin:');
+  if(senha === '001533'){
+    document.getElementById('adminPanel').style.display = 'block';
+  } else {
+    alert('Senha incorreta');
+    location.href = '/';
+  }
+}
+
+/* SALVAR ADMIN */
+document.getElementById('saveAdmin').onclick = () => {
+  const v = document.getElementById('adminValor').value;
+  const c = document.getElementById('adminCode').value;
+
+  if(v) document.getElementById('valor').innerText = v;
+  if(c){
+    document.getElementById('pixCode').value = c;
+    document.getElementById('pixView').innerText = c;
+  }
+  alert('Atualizado');
+};
+</script>
+
+</body>
+</html>
