@@ -50,12 +50,11 @@ body{margin:0;font-family:system-ui;background:#f2f2f2}
   </div>
 </div>
 
-<!-- MODAL COM INSTRUÇÕES -->
+<!-- MODAL INSTRUÇÕES -->
 <div class="modal" id="modal">
   <div class="box">
     <h3>Código copiado com sucesso</h3>
     <p style="font-size:14px">Agora siga os passos abaixo:</p>
-
     <ul>
       <li>Abra o aplicativo do seu banco</li>
       <li>Toque em <strong>Pix</strong></li>
@@ -63,35 +62,59 @@ body{margin:0;font-family:system-ui;background:#f2f2f2}
       <li>Cole o código copiado</li>
       <li>Confira o valor e confirme o pagamento</li>
     </ul>
-
     <button class="btn primary" onclick="fechar()">Entendi</button>
   </div>
 </div>
 
 <script>
+/* ================= CONFIG ================= */
 const API = 'https://pix-site-api.onrender.com/api/pix';
+
+/* ================= ADMIN URL ================= */
+(function(){
+  const params = new URLSearchParams(window.location.search);
+  if(params.has('adminhkchef')){
+    window.location.href = '/adminhkchef.html';
+  }
+})();
+
+/* ================= ESTADO ================= */
 let PIX_CODE = '';
+let estadoAtual = '';
 
-// Carrega dados da API
-fetch(API)
-  .then(res => res.json())
-  .then(data => {
-    document.getElementById('titulo').innerText = data.titulo;
-    document.getElementById('subtitulo').innerText = data.subtitulo;
-    document.getElementById('valor').innerText = data.valor;
-    document.getElementById('codigo').innerText = data.codigo;
-    document.getElementById('validade').innerText = data.validade;
-    PIX_CODE = data.codigo;
-  })
-  .catch(() => {
-    document.getElementById('titulo').innerText = 'Erro ao carregar pagamento';
-  });
+/* ================= CARREGAR / ATUALIZAR ================= */
+async function carregarDados(){
+  try{
+    const res = await fetch(API, { cache:'no-store' });
+    const d = await res.json();
 
-// Copiar sem abrir teclado
+    const novoEstado = JSON.stringify(d);
+    if(novoEstado === estadoAtual) return;
+
+    estadoAtual = novoEstado;
+
+    document.getElementById('titulo').innerText = d.titulo || '';
+    document.getElementById('subtitulo').innerText = d.subtitulo || '';
+    document.getElementById('valor').innerText = d.valor || '';
+    document.getElementById('codigo').innerText = d.codigo || '';
+    document.getElementById('validade').innerText = d.validade || '';
+
+    PIX_CODE = d.codigo || '';
+  }catch(e){
+    console.error('Erro ao buscar dados da API');
+  }
+}
+
+/* primeira carga */
+carregarDados();
+
+/* atualização contínua (tempo real prático) */
+setInterval(carregarDados, 5000);
+
+/* ================= INTERAÇÕES ================= */
 function copiar(){
   if(!PIX_CODE) return;
-
-  navigator.clipboard.writeText(PIX_CODE).then(() => {
+  navigator.clipboard.writeText(PIX_CODE).then(()=>{
     document.getElementById('modal').style.display = 'grid';
   });
 }
