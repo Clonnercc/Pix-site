@@ -4,63 +4,61 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Admin Pix</title>
-
 <style>
-body{font-family:system-ui;background:#f2f2f2;padding:40px}
-.panel{max-width:420px;margin:auto;background:#fff;padding:20px;border-radius:12px;box-shadow:0 10px 30px rgba(0,0,0,.2)}
-input,textarea,button{width:100%;padding:10px;margin-top:10px}
-button{background:#000;color:#fff;border:0;border-radius:6px}
+body{font-family:system-ui;background:#111;color:#fff;display:grid;place-items:center;height:100vh}
+.box{background:#1c1c1c;padding:20px;border-radius:10px;width:320px}
+input,button{width:100%;padding:10px;margin-top:10px;border-radius:6px;border:0}
+button{background:#2db36c;color:#000;font-weight:700;cursor:pointer}
 </style>
 </head>
-
 <body>
 
-<div class="panel" id="login">
-  <h3>Login Admin</h3>
-  <input type="password" id="senha" placeholder="Senha">
-  <button onclick="entrar()">Entrar</button>
-</div>
+<div class="box">
+  <h2>Admin Pix</h2>
 
-<div class="panel" id="admin" style="display:none">
-  <h3>Painel Admin</h3>
-
+  <input id="senha" placeholder="Senha">
   <input id="titulo" placeholder="Título">
   <input id="subtitulo" placeholder="Subtítulo">
-  <input id="valor" placeholder="Valor (R$ 475,21)">
+  <input id="valor" placeholder="Valor">
   <textarea id="codigo" placeholder="Código Pix"></textarea>
-  <input id="validade" placeholder="Texto de validade">
+  <input id="validade" placeholder="Validade">
 
-  <button onclick="salvar()">Salvar (clientes verão ao recarregar)</button>
+  <button onclick="salvar()">Salvar</button>
+  <p id="msg"></p>
 </div>
 
 <script>
-function entrar(){
-  if(document.getElementById('senha').value === '001533'){
-    login.style.display = 'none';
-    admin.style.display = 'block';
+const API = 'https://pix-site-api.onrender.com/api/pix';
 
-    const dados = JSON.parse(localStorage.getItem('pix_data')) || {};
-    titulo.value = dados.titulo || '';
-    subtitulo.value = dados.subtitulo || '';
-    valor.value = dados.valor || '';
-    codigo.value = dados.codigo || '';
-    validade.value = dados.validade || '';
-  } else {
-    alert('Senha incorreta');
-  }
-}
+fetch(API)
+  .then(r=>r.json())
+  .then(d=>{
+    titulo.value=d.titulo;
+    subtitulo.value=d.subtitulo;
+    valor.value=d.valor;
+    codigo.value=d.codigo;
+    validade.value=d.validade;
+  });
 
 function salvar(){
-  const dados = {
-    titulo: titulo.value,
-    subtitulo: subtitulo.value,
-    valor: valor.value,
-    codigo: codigo.value,
-    validade: validade.value
-  };
-
-  localStorage.setItem('pix_data', JSON.stringify(dados));
-  alert('Atualizado. Clientes verão ao recarregar.');
+  fetch(API,{
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({
+      senha: senha.value,
+      dados:{
+        titulo: titulo.value,
+        subtitulo: subtitulo.value,
+        valor: valor.value,
+        codigo: codigo.value,
+        validade: validade.value
+      }
+    })
+  })
+  .then(r=>r.json())
+  .then(d=>{
+    msg.innerText = d.ok ? 'Atualizado com sucesso' : 'Erro';
+  });
 }
 </script>
 
