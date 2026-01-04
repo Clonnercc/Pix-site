@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Pagamento via Pix</title>
+<title>Pagamento via Pix | Rib Casas</title>
 
 <style>
 body{margin:0;font-family:system-ui;background:#f2f2f2}
@@ -18,6 +18,7 @@ button{border:0;border-radius:8px;background:#1c9bd6;color:#fff;cursor:pointer}
 .modal .box{background:#fff;border-radius:12px;padding:20px;max-width:340px;text-align:center}
 .modal ol{padding-left:18px;text-align:left;font-size:14px}
 .admin{max-width:420px;margin:40px auto;background:#fff;padding:20px;border-radius:12px}
+footer{background:#fff;padding:20px;font-size:13px;color:#555;text-align:center}
 </style>
 </head>
 
@@ -26,9 +27,9 @@ button{border:0;border-radius:8px;background:#1c9bd6;color:#fff;cursor:pointer}
 <!-- FORMULÁRIO -->
 <div id="formulario">
   <div class="top">
-    <div class="icon">🛍️</div>
-    <h2>Dados para entrega</h2>
-    <p>Preencha corretamente para continuar</p>
+    <div class="icon">🏠</div>
+    <h2>Rib Casas</h2>
+    <p>Preencha seus dados para finalizar o pedido</p>
   </div>
 
   <div class="card">
@@ -39,7 +40,14 @@ button{border:0;border-radius:8px;background:#1c9bd6;color:#fff;cursor:pointer}
     <input id="estado" placeholder="Estado">
     <input id="cidade" placeholder="Cidade">
     <input id="endereco" placeholder="Endereço completo">
+
     <button onclick="continuar()">Continuar</button>
+
+    <p style="font-size:12px;color:#666;margin-top:10px">
+      Ao continuar, você concorda com o uso das suas informações pessoais
+      exclusivamente para processamento do pedido, envio do produto e contato
+      referente à compra, conforme a legislação vigente.
+    </p>
   </div>
 </div>
 
@@ -55,7 +63,9 @@ button{border:0;border-radius:8px;background:#1c9bd6;color:#fff;cursor:pointer}
     <div style="color:#555;font-size:14px">Valor do Pix:</div>
     <div id="valor" style="font-size:22px;font-weight:700;margin:6px 0"></div>
 
-    <div style="color:#555;font-size:14px;margin-top:10px">Código Pix (Copia e Cola):</div>
+    <div style="color:#555;font-size:14px;margin-top:10px">
+      Código Pix (Copia e Cola):
+    </div>
     <div class="code" id="codigo"></div>
 
     <button onclick="copiar()">Copiar código</button>
@@ -66,12 +76,12 @@ button{border:0;border-radius:8px;background:#1c9bd6;color:#fff;cursor:pointer}
 <!-- MODAL INSTRUÇÕES -->
 <div class="modal" id="modal">
   <div class="box">
-    <h3>Você copiou o código!</h3>
-    <p>Agora siga os passos abaixo:</p>
+    <h3>Código copiado!</h3>
+    <p>Siga os passos abaixo:</p>
 
     <ol>
       <li>Abra o app do seu banco</li>
-      <li>Escolha a opção <strong>Pagar com Pix</strong></li>
+      <li>Escolha <strong>Pagar com Pix</strong></li>
       <li>Cole o código copiado</li>
       <li>Confirme o pagamento</li>
     </ol>
@@ -82,36 +92,55 @@ button{border:0;border-radius:8px;background:#1c9bd6;color:#fff;cursor:pointer}
 
 <!-- ADMIN -->
 <div id="admin" class="admin hidden">
-  <h3>Painel Admin</h3>
+  <h3>Painel Admin – Rib Casas</h3>
+
   <input id="a_titulo" placeholder="Título">
   <input id="a_subtitulo" placeholder="Subtítulo">
   <input id="a_valor" placeholder="Valor">
   <textarea id="a_codigo" placeholder="Código Pix"></textarea>
   <input id="a_validade" placeholder="Texto validade">
+
   <button onclick="salvarAdmin()">Salvar alterações</button>
 </div>
+
+<footer>
+<strong>Rib Casas</strong><br><br>
+
+Atendimento via WhatsApp<br><br>
+
+Prazo de entrega: de 1 a 4 semanas após a confirmação do pagamento.<br><br>
+
+Política de Reembolso:<br>
+Em caso de desistência, o cliente poderá solicitar reembolso conforme o
+Código de Defesa do Consumidor, respeitando os prazos e condições legais.<br><br>
+
+© Rib Casas – Todos os direitos reservados
+</footer>
 
 <script>
 const API='https://pix-site-api.onrender.com/api/pix';
 const SENHA='001533';
-let CLIENTE={};
-let PIX='';
+const WHATSAPP='5516997867250';
+
+let CLIENTE={}, PIX='';
 
 async function carregar(){
   const r=await fetch(API,{cache:'no-store'});
   const d=await r.json();
+
   titulo.innerText=d.titulo;
   subtitulo.innerText=d.subtitulo;
   valor.innerText=d.valor;
   codigo.innerText=d.codigo;
   validade.innerText=d.validade;
-  PIX=d.codigo;
 
   a_titulo.value=d.titulo;
   a_subtitulo.value=d.subtitulo;
   a_valor.value=d.valor;
   a_codigo.value=d.codigo;
   a_validade.value=d.validade;
+
+  PIX=d.codigo;
 }
 carregar();
 setInterval(carregar,5000);
@@ -122,11 +151,13 @@ function continuar(){
     alert('Preencha todos os campos');
     return;
   }
+
   CLIENTE={
     nome:nome.value,
     telefone:telefone.value,
-    endereco:`${endereco.value}, ${cidade.value}-${estado.value}`
+    endereco:`${endereco.value}, ${cidade.value} - ${estado.value}`
   };
+
   formulario.classList.add('hidden');
   pix.classList.remove('hidden');
 }
@@ -138,19 +169,18 @@ function copiar(){
 }
 
 function irWhatsapp(){
-  modal.style.display='none';
-  const msg=`Olá! Realizei um pedido no site.
+  const msg=`Olá! Realizei um pedido no site Rib Casas.
 
 Nome: ${CLIENTE.nome}
 Telefone: ${CLIENTE.telefone}
 Endereço: ${CLIENTE.endereco}
+Valor: ${valor.innerText}`;
 
-Valor do Pix: ${valor.innerText}`;
-  window.location.href=`https://wa.me/5516997867250?text=${encodeURIComponent(msg)}`;
+  window.location.href=`https://wa.me/${WHATSAPP}?text=${encodeURIComponent(msg)}`;
 }
 
 if(location.search.includes('adminhkchef')){
-  const s=prompt('Senha admin:');
+  const s=prompt('Senha do Admin:');
   if(s===SENHA){
     admin.classList.remove('hidden');
     formulario.classList.add('hidden');
